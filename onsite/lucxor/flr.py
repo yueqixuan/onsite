@@ -6,8 +6,7 @@ This module contains the FLRCalculator class for calculating false localization 
 
 import logging
 import numpy as np
-from typing import List, Dict, Any, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import List, Tuple
 from .constants import REAL, DECOY, TINY_NUM
 
 logger = logging.getLogger(__name__)
@@ -150,21 +149,6 @@ class FLRCalculator:
 
         # Decoy sequence - use NumPy's optimized variance (ddof=1 for sample variance)
         self.delta_score_var_neg = np.var(self.neg, ddof=1) if self.n_decoy > 1 else 0.0
-
-    def normal_density(self, cur_tick_mark: float, cur_score: float, h: float) -> float:
-        """
-        Calculate normal density
-
-        Args:
-            cur_tick_mark: Current tick mark
-            cur_score: Current score
-            h: Bandwidth
-
-        Returns:
-            Density value
-        """
-        x = (cur_tick_mark - cur_score) / h
-        return np.exp(-0.5 * x * x) / (h * np.sqrt(2.0 * np.pi))
 
     def eval_tick_marks(self, data_type: int) -> None:
         """
@@ -342,23 +326,6 @@ class FLRCalculator:
         result = np.where(x_values >= self.tick_marks[-1], 0.0, result)
 
         return result
-
-    def get_local_auc(self, x: float, which_f: int) -> float:
-        """
-        Calculate local density value (density at point x).
-
-        Note: This is kept for backwards compatibility. For batch processing,
-        use _interpolate_density_vectorized() directly.
-
-        Args:
-            x: Score
-            which_f: Which distribution to use (f0 or f1)
-
-        Returns:
-            Density value
-        """
-        f = self.f0 if which_f == DECOY else self.f1
-        return float(self._interpolate_density_vectorized(np.array([x]), f)[0])
 
     def get_global_auc(self, x: float, which_f: int) -> float:
         """
