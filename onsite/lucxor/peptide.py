@@ -17,12 +17,10 @@ from .constants import (
     CTERM_MOD,
     AA_MASSES,
     DECOY_AA_MAP,
-    AA_DECOY_MAP,
     WATER_MASS,
     PROTON_MASS,
 )
 from .globals import get_decoy_symbol
-from .peak import Peak
 
 logger = logging.getLogger(__name__)
 

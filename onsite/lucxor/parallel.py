@@ -87,14 +87,13 @@ def parallel_psm_processing(
 
 
 def get_optimal_thread_count(
-    num_items: int, min_threads: int = 1, max_threads: int = None
+    num_items: int, max_threads: int = None
 ) -> int:
     """
     Calculate optimal thread count based on data size
 
     Args:
         num_items: Number of data items
-        min_threads: Minimum number of threads
         max_threads: Maximum number of threads
 
     Returns:

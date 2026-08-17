@@ -18,16 +18,11 @@ from .constants import (
     CTERM_MOD,
     AA_MASSES,
     DECOY_AA_MAP,
-    AA_DECOY_MAP,
-    NEUTRAL_LOSSES,
-    MIN_DELTA_SCORE,
     PROTON_MASS,
     WATER_MASS,
-    DECOY_AMINO_ACIDS,
     PHOSPHO_MOD_MASS,
     OXIDATION_MASS,
 )
-from .peak import Peak
 from .peptide import (
     Peptide,
     extract_target_amino_acids,
@@ -35,7 +30,6 @@ from .peptide import (
     strip_modifications,
 )
 from .spectrum import Spectrum
-from .flr import FLRCalculator
 from .globals import get_decoy_symbol
 
 logger = logging.getLogger(__name__)
