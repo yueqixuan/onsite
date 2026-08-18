@@ -327,33 +327,6 @@ class FLRCalculator:
 
         return result
 
-    def get_global_auc(self, x: float, which_f: int) -> float:
-        """
-        Calculate global AUC (area from x to end of distribution).
-
-        Note: This is kept for backwards compatibility. For batch processing,
-        use calc_both_fdrs() which uses vectorized computation.
-
-        Args:
-            x: Score
-            which_f: Which distribution to use (f0 or f1)
-
-        Returns:
-            AUC value
-        """
-        if which_f == DECOY:
-            f = self.f0
-            if not hasattr(self, '_cumulative_auc_f0'):
-                self._cumulative_auc_f0 = self._compute_cumulative_auc_from_end(self.f0)
-            cumulative_auc = self._cumulative_auc_f0
-        else:
-            f = self.f1
-            if not hasattr(self, '_cumulative_auc_f1'):
-                self._cumulative_auc_f1 = self._compute_cumulative_auc_from_end(self.f1)
-            cumulative_auc = self._cumulative_auc_f1
-
-        return float(self._global_auc_vectorized(np.array([x]), f, cumulative_auc)[0])
-
     def calc_both_fdrs(self) -> None:
         """
         Calculate global and local FDR for all PSMs.
@@ -917,45 +890,3 @@ class FLRCalculator:
         except Exception as e:
             logger.error(f"Error finding closest FLR value: {str(e)}")
             return (1.0, 1.0)
-
-    def assign_flr_from_mapping(self, psms: List) -> None:
-        """
-        Assign FLR values to PSMs using saved mapping (for second round calculation)
-
-        Args:
-            psms: List of PSM objects
-        """
-        try:
-            if not self.delta_score_to_flr_map:
-                logger.warning(
-                    "Delta score to FLR mapping is empty, cannot assign FLR values"
-                )
-                return
-
-            assigned_count = 0
-            for psm in psms:
-                if (
-                    not psm.is_decoy
-                    and hasattr(psm, "delta_score")
-                    and not np.isnan(psm.delta_score)
-                ):
-                    if psm.delta_score > self.min_delta_score:
-                        global_flr, local_flr = self.find_closest_flr(psm.delta_score)
-                        psm.global_flr = global_flr
-                        psm.local_flr = local_flr
-                        assigned_count += 1
-                    else:
-                        # For PSMs with delta_score <= min_delta_score, set default values
-                        psm.global_flr = 1.0
-                        psm.local_flr = 1.0
-                else:
-                    # Set decoy PSMs to NaN
-                    psm.global_flr = float("nan")
-                    psm.local_flr = float("nan")
-
-            logger.info(
-                f"Assigned FLR values to {assigned_count} real PSMs using mapping"
-            )
-
-        except Exception as e:
-            logger.error(f"Error assigning FLR values using mapping: {str(e)}")
